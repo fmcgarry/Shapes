@@ -22,9 +22,16 @@ public:
     Boundary
   };
 
+  enum Error
+  {
+    SUCCESS,
+    NOT_VALID_SHAPE,
+    DUPLICATE_POINT
+  };
+
   Shape(const std::vector<Point>& points, Shape::PolygonType type);
 
-  bool isValid(int status);
+  bool isValid(int& error);
   double GetArea();
   std::vector<Point> GetBoundingBox();
   QueryPointPosition QueryPoint(double x, double y);
@@ -41,6 +48,7 @@ private:
 
   void CalculateBoundingBox(std::vector<Point>& bounding_box);
   void CalculateArea(double& surfaceArea);
+  bool CheckForDuplicates();
   void SortPoints(std::vector<Point>& points);
 };
 

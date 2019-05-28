@@ -6,7 +6,6 @@
  *  WHERE:    points  =   A vector containing Point types.
  *            type    =   Convex or Concave type polygon.
  *
- *  RETURN:   None.
  *  NOTE:     A Concave type polygon REQUIRES the points to be given in a
  *            clock-wise or anticlock-wise order from the first vertex
  *            to the last.
@@ -16,22 +15,25 @@ Shape::Shape(const std::vector<Point>& points, Shape::PolygonType type)
   m_points = points;
   m_bounding_box;
   m_type = type;
+  int error{};
 
-  if (m_type == Convex)
+  if (isValid(error))
   {
-    SortPoints(m_points);
-  }
+    if (m_type == Convex)
+    {
+      SortPoints(m_points);
+    }
 
-  CalculateBoundingBox(m_bounding_box);
-  CalculateArea(m_area);
+    CalculateBoundingBox(m_bounding_box);
+    CalculateArea(m_area);
+  }
 }
 
 /***
  *  PURPOSE:  Calculate the area of the shape.
  *  WHERE:    shapeArea = The calculated area
  *
- *  RETURN:   None.
- *  NOTE:     None.
+ *  RETURN:   Void.
  ***/
 void Shape::CalculateArea(double& shapeArea)
 {
@@ -58,8 +60,7 @@ void Shape::CalculateArea(double& shapeArea)
  *  PURPOSE:  Calculate the bounding box.
  *  WHERE:    bounding_box  =   A vector containing Point types.
  *
- *  RETURN:   None.
- *  NOTE:     None.
+ *  RETURN:   Void.
  ***/
 void Shape::CalculateBoundingBox(std::vector<Point>& bounding_box)
 {
@@ -116,10 +117,8 @@ void Shape::CalculateBoundingBox(std::vector<Point>& bounding_box)
 
 /***
  *  PURPOSE:  Return the area of the shape.
- *  WHERE:    None.
  *
  *  RETURN:   A double value that represents the area of the shape.
- *  NOTE:     None.
  ***/
 double Shape::GetArea()
 {
@@ -128,9 +127,8 @@ double Shape::GetArea()
 
 /***
  *  PURPOSE:  Return the bounding box of the shape.
- *  WHERE:    None.
- *
  *  RETURN:   A vector of Point types that represent the four vertices of the bounding box.
+ *
  *  NOTE:     Points will be returned in a clock-wise order starting
  *            at the top left position.
  ***/
@@ -167,7 +165,7 @@ Shape::QueryPointPosition Shape::QueryPoint(double x, double y)
  *  PURPOSE:  Sort points in a clock-wise manor.
  *  WHERE:    points  =   A vector containing Point types.
  *
- *  RETURN:   None.
+ *  RETURN:   Void.
  *  NOTE:     m_type MUST BE Convex to be sorted.
  ***/
 void Shape::SortPoints(std::vector<Point>& points)
@@ -218,21 +216,50 @@ void Shape::SortPoints(std::vector<Point>& points)
  *  PURPOSE:  Check to make sure the shape is a valid shape.
  *  WHERE:    error  = The return code. 0 if shape is valid.
  *
- *  RETURN:   bool.
+ *  RETURN:   True if shape is valid, false otherwise.
  ***/
-bool Shape::isValid(int error)
+bool Shape::isValid(int& error)
 {
   // Make sure no points are duplicated. (Shoelace does not work)
   //   - Maybe split shape into 2 shapes, do shoelace, then add together?
   // Make sure there are more than 2 points. (Has to be at least a triangle)
 
-  bool isValidShape = m_points.size() < 3;
-  bool noDuplicatePoints{};
+  bool isValidShape = m_points.size() > 2;
+  bool isPointDuplicated{ CheckForDuplicates() };
 
-  if (isValidShape && noDuplicatePoints)
+  if (!isValidShape)
   {
-    error = 0;
-    return true;
+    error = 1;
+    return false;
+  }
+
+  if (isPointDuplicated)
+  {
+    error = 2;
+    return false;
+  }
+
+  error = 0;
+  return true;
+}
+
+/***
+ *  PURPOSE:  Check the point collection for duplicates.
+ *
+ *  RETURN:   True if there are duplicates, false otherwise.
+ ***/
+bool Shape::CheckForDuplicates()
+{
+  int duplicates{ 1 };
+
+  for (size_t i = 0; i < m_points.size(); ++i)
+  {
+    duplicates = std::count(m_points.begin(), m_points.end(), m_points[i]);
+
+    if (duplicates != 1)
+    {
+      return true;
+    }
   }
 
   return false;
