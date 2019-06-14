@@ -162,7 +162,7 @@ Shape::QueryPointPosition Shape::QueryPoint(double x, double y)
 }
 
 /***
- *  PURPOSE:  Sort points in a clock-wise manor.
+ *  PURPOSE:  Sort points in a clock-wise manner.
  *  WHERE:    points  =   A vector containing Point types.
  *
  *  RETURN:   Void.
